@@ -4,6 +4,11 @@ describe "Authentication" do
 
   subject { page }
 
+  describe "before the sign in" do
+    it { should_not have_link('Profile') }
+    it { should_not have_link('Settings') }
+  end
+
   describe  "signin page" do
     before { visit signin_path }
 
@@ -47,6 +52,26 @@ describe "Authentication" do
 
   describe "authorization" do
     
+    describe "for signed-in users" do
+      let(:user) { FactoryGirl.create(:user) }
+      before { sign_in user }
+
+      describe "trying to acess new action" do
+        before { visit signup_path }
+
+        it { should_not have_selector('title', text: full_title('Home')) }
+        it { should_not have_selector('h1', text: 'Sign up') }
+        it { should_not have_selector('title', text: 'Sign up') }
+      end
+
+      describe "submitting a POST request to Users#create method" do
+        before { post users_path }
+
+        specify { response.should redirect_to(root_path) }
+      end
+    end
+
+
     describe "for non-signed-in users" do
       let(:user) { FactoryGirl.create(:user) }
 
